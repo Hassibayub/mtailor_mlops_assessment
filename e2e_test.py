@@ -32,8 +32,8 @@ def test_predict_endpoint():
     """Test the predict endpoint with an image"""
     print("\nTesting predict endpoint...")
     
-    # Path to test image file
-    test_image_path = "n01667114_mud_turtle.JPEG"  # Make sure this image exists in your directory
+
+    test_image_path = "n01667114_mud_turtle.JPEG" 
     
     if not os.path.exists(test_image_path):
         print(f"❌ Test image not found: {test_image_path}")
@@ -46,14 +46,12 @@ def test_predict_endpoint():
                 'file': ('test_image.jpg', image_file, 'image/jpeg')
             }
             
-            # Make POST request
+
             response = requests.post(f"{BASE_URL}/predict", headers=HEADERS, files=files)
             
-            # Print response
             print(f"Status Code: {response.status_code}")
             print(f"Response: {response.json()}")
             
-            # Basic assertions
             assert response.status_code == 200
             assert "prediction" in response.json()
             assert "class_id" in response.json()["prediction"]

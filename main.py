@@ -23,6 +23,14 @@ async def root() -> Dict[str, str]:
     return {"message": "MTailor Model API is running"}
 
 
+@app.get("/health")
+def health():
+    return "OK"
+
+@app.get("/ready")
+def ready():
+    return "OK"
+
 @app.post("/predict")
 async def predict_image(file: UploadFile = File(...)) -> Dict[str, Any]:
     """

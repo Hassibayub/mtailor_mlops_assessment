@@ -5,7 +5,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import time
 
-import numpy as np
 import pytest
 
 from model import ImagePreprocessor, ONNXModel

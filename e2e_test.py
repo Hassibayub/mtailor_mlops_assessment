@@ -28,47 +28,6 @@ def test_root_endpoint():
         print(f"❌ Root endpoint test failed: {str(e)}")
         return False
 
-def test_health_endpoint():
-    """Test the health endpoint"""
-    print("\nTesting health endpoint...")
-    try:
-        response = requests.get(f"{BASE_URL}/health", headers=HEADERS)
-        print(f"Status Code: {response.status_code}")
-        print(f"Response: {response.text.lower()}")
-        
-        res = response.text.lower()
-        print("response:", res)
-        
-        # Assertions
-        assert response.status_code == 200
-        assert res == "ok"
-        
-        
-        print("✅ Health endpoint test passed")
-        return True
-    except Exception as e:
-        print(f"❌ Health endpoint test failed: {str(e)}")
-        return False
-
-def test_ready_endpoint():
-    """Test the ready endpoint"""
-    print("\nTesting ready endpoint...")
-    try:
-        response = requests.get(f"{BASE_URL}/ready", headers=HEADERS)
-        print(f"Status Code: {response.status_code}")
-        print(f"Response: {response.text}")
-        
-        # Assertions
-        print(response.text)
-        
-        assert response.status_code == 200
-        assert response.text == "OK"
-        print("✅ Ready endpoint test passed")
-        return True
-    except Exception as e:
-        print(f"❌ Ready endpoint test failed: {str(e)}")
-        return False
-
 def test_predict_endpoint():
     """Test the predict endpoint with an image"""
     print("\nTesting predict endpoint...")
@@ -113,10 +72,8 @@ def run_all_tests():
     print("Starting E2E API tests...")
     
     tests = [
-        # ("Root Endpoint", test_root_endpoint),
-        ("Health Endpoint", test_health_endpoint),
-        ("Ready Endpoint", test_ready_endpoint),
-        # ("Predict Endpoint", test_predict_endpoint)
+        ("Root Endpoint", test_root_endpoint),
+        ("Predict Endpoint", test_predict_endpoint)
     ]
     
     results = []

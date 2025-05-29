@@ -1,61 +1,63 @@
 import os
 import time
+from typing import Any, Dict
+
+from fastapi import FastAPI, File, HTTPException, UploadFile
+
 from model import ONNXModel
 
+app = FastAPI(title="MTailor Model API")
 
-def test_model_predictions(image_path: str, onnx_model: str):
-    """Load and test the ONNX model with timing and validation"""
+model = None
+try:
+    model = ONNXModel("model/model.onnx")
+except Exception as e:
+    print(f"Error loading model: {e}")
+
+
+@app.get("/")
+async def root() -> Dict[str, str]:
+    """
+    Root endpoint to check if the API is running
+    """
+    return {"message": "MTailor Model API is running"}
+
+
+@app.post("/predict")
+async def predict_image(file: UploadFile = File(...)) -> Dict[str, Any]:
+    """
+    Predict image class using ONNX model
+    """
+    if not model:
+        raise HTTPException(status_code=500, detail="Model not loaded")
+
     try:
-        if not os.path.exists(image_path):
-            raise FileNotFoundError(f"Image file not found: {image_path}")
-        if not os.path.exists(onnx_model):
-            raise FileNotFoundError(f"ONNX model not found: {onnx_model}")
+        # Save uploaded file temporarily
+        temp_path = f"temp_{file.filename}"
+        with open(temp_path, "wb") as buffer:
+            content = await file.read()
+            buffer.write(content)
 
-        model = ONNXModel(onnx_model)
-
+        # Make prediction
         start_time = time.time()
-        
-        pred_class, confidence = model.predict(image_path)
+        pred_class, confidence = model.predict(temp_path)
         inference_time = time.time() - start_time
 
-        expected_classes = {
-            "n01440764_tench.jpeg": 0,
-            "n01667114_mud_turtle.jpeg": 35
+        # Clean up
+        os.remove(temp_path)
+
+        return {
+            "filename": file.filename,
+            "prediction": {"class_id": pred_class, "confidence": round(float(confidence),3)},
+            "inference_time": inference_time,
+            "status": "success",
         }
 
-        # Get expected class for this image
-        image_name = os.path.basename(image_path)
-        expected_class = expected_classes.get(image_name)
-
-        print(f"\n\n=== Results for {image_path} ===")
-        print(f"Prediction: Class {pred_class} (confidence: {confidence:.4f})")
-        print(f"Inference time: {inference_time:.3f} seconds")
-        
-        if expected_class is not None:
-            print(f"Expected class: {expected_class}")
-            print(f"Prediction {'correct' if pred_class == expected_class else 'incorrect'}")
-        
-        if inference_time > 3.0:
-            print("Warning: Inference time exceeds 3 seconds threshold")
-
     except Exception as e:
-        print(f"Error processing {image_path}: {str(e)}")
-        print(f"Error type: {type(e).__name__}")
-        raise 
-
-
-def main():
-    test_images = [
-        "n01440764_tench.jpeg",  # should predict class 0
-        "n01667114_mud_turtle.jpeg",  # should predict class 35
-    ]
-
-    for image in test_images:
-        test_model_predictions(
-            image_path=image,
-            onnx_model="model/model.onnx"
-        )
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":
-    main()
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8080)

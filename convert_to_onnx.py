@@ -76,7 +76,7 @@ def verify_onnx_model(onnx_path: str, test_image_path: str):
 if __name__ == "__main__":
     model_path = "model/pytorch_model_weights.pth"
     onnx_path = "model/model.onnx"
-    test_image_path = "./n01667114_mud_turtle.jpeg"
+    test_image_path = "n01667114_mud_turtle.JPEG"
 
     convert_to_onnx(model_path, onnx_path)
 

@@ -1,0 +1,6 @@
+name: mtailor-model
+dockerfile: Dockerfile
+python_version: "3.11"
+gpu: true
+env_vars:
+  - MODEL_PATH=/ml_models/model.onnx

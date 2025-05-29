@@ -12,6 +12,9 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 COPY . .
 
+RUN mkdir -p /ml_models
+COPY model/model.onnx /ml_models/
+
 ENV PORT=8000
 EXPOSE ${PORT}
 

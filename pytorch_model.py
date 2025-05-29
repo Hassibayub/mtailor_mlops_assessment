@@ -17,7 +17,20 @@ def conv3x3(
     groups: int = 1,
     dilation: int = 1,
 ) -> nn.Conv2d:
-    """3x3 convolution with padding"""
+    """
+    Create a 3x3 2D convolution layer with padding.
+    
+    Args:
+        in_planes: Number of input channels
+        out_planes: Number of output channels
+        stride: Stride of the convolution (default: 1)
+        groups: Number of blocked connections from input channels
+               to output channels (default: 1)
+        dilation: Spacing between kernel elements (default: 1)
+        
+    Returns:
+        nn.Conv2d: A PyTorch 2D convolution layer
+    """
     return nn.Conv2d(
         in_planes,
         out_planes,
@@ -31,7 +44,17 @@ def conv3x3(
 
 
 def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
-    """1x1 convolution"""
+    """
+    Create a 1x1 2D convolution layer (pointwise convolution).
+    
+    Args:
+        in_planes: Number of input channels
+        out_planes: Number of output channels
+        stride: Stride of the convolution (default: 1)
+        
+    Returns:
+        nn.Conv2d: A PyTorch 2D convolution layer
+    """
     return nn.Conv2d(
         in_planes, out_planes, kernel_size=1, stride=stride, bias=False
     )

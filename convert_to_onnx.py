@@ -3,16 +3,24 @@ import onnxruntime
 import torch
 import torch.onnx
 from PIL import Image
+from typing import Dict, Tuple, Optional
 
 from pytorch_model import BasicBlock, Classifier
 
 
-def convert_to_onnx(model_path: str, output_path: str):
+def convert_to_onnx(model_path: str, output_path: str) -> None:
     """
-    Convert PyTorch model to ONNX format
+    Convert PyTorch model to ONNX format.
+
     Args:
-        model_path: Path to PyTorch model weights
-        output_path: Path to save ONNX model
+        model_path: Path to PyTorch model weights file
+        output_path: Path where ONNX model will be saved
+
+    Returns:
+        None
+
+    Raises:
+        RuntimeError: If model conversion fails
     """
     # Initialize model
     model = Classifier(BasicBlock, [2, 2, 2, 2])
@@ -39,12 +47,26 @@ def convert_to_onnx(model_path: str, output_path: str):
     print(f"Model converted and saved to {output_path}")
 
 
-def verify_onnx_model(onnx_path: str, test_image_path: str):
+def verify_onnx_model(onnx_path: str, test_image_path: str) -> Tuple[int, int, bool]:
     """
-    Verify ONNX model produces same output as PyTorch model
+    Verify ONNX model produces same output as PyTorch model.
+
+    Loads both PyTorch and ONNX models, runs inference on the same image,
+    and compares their predictions.
+
     Args:
-        onnx_path: Path to ONNX model
-        test_image_path: Path to test image
+        onnx_path: Path to ONNX model file
+        test_image_path: Path to test image file
+
+    Returns:
+        Tuple containing:
+            - PyTorch model prediction class ID
+            - ONNX model prediction class ID
+            - Boolean indicating if predictions match
+
+    Raises:
+        FileNotFoundError: If model or image files not found
+        RuntimeError: If inference fails
     """
 
     # Load PyTorch model to compare the results
@@ -69,6 +91,8 @@ def verify_onnx_model(onnx_path: str, test_image_path: str):
     print(f"PyTorch prediction: {pytorch_prediction}")
     print(f"ONNX prediction: {onnx_prediction}")
     print(f"Predictions match: {pytorch_prediction == onnx_prediction}")
+
+    return pytorch_prediction, onnx_prediction, pytorch_prediction == onnx_prediction
 
 
 if __name__ == "__main__":

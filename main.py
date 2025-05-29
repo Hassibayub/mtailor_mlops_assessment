@@ -18,23 +18,52 @@ except Exception as e:
 @app.get("/")
 async def root() -> Dict[str, str]:
     """
-    Root endpoint to check if the API is running
+    Root endpoint to check if the API is running.
+    
+    Returns:
+        Dict[str, str]: A dictionary containing a status message
+            message: Status message indicating API is running
     """
     return {"message": "MTailor Model API is running"}
 
 
 @app.get("/health")
-def health():
+async def health() -> str:
+    """
+    Health check endpoint for monitoring API health.
+    
+    Returns:
+        str: "OK" if the service is healthy
+    """
     return "OK"
 
 @app.get("/ready")
-def ready():
+async def ready() -> str:
+    """
+    Readiness check endpoint to verify if service is ready to accept requests.
+    
+    Returns:
+        str: "OK" if the service is ready to accept requests
+    """
     return "OK"
 
 @app.post("/predict")
 async def predict_image(file: UploadFile = File(...)) -> Dict[str, Any]:
     """
-    Predict image class using ONNX model
+    Predict image class using ONNX model.
+    
+    Args:
+        file (UploadFile): The uploaded image file to classify
+        
+    Returns:
+        Dict[str, Any]: Prediction results containing:
+            filename: Name of the uploaded file
+            prediction: Dict containing class_id and confidence score
+            inference_time: Time taken for prediction in seconds
+            status: Status of the prediction request
+            
+    Raises:
+        HTTPException: If model is not loaded or prediction fails
     """
     if not model:
         raise HTTPException(status_code=500, detail="Model not loaded")

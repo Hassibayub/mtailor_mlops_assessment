@@ -1,6 +1,7 @@
 import requests
 import os
 import sys
+from typing import Tuple, List, Dict, Any, Optional
 
 # Base URL for all API endpoints
 BASE_URL = "https://api.cortex.cerebrium.ai/v4/p-9d0ef0c4/app"
@@ -10,8 +11,16 @@ HEADERS = {
     'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0SWQiOiJwLTlkMGVmMGM0IiwiaWF0IjoxNzQ4NTIxMzg3LCJleHAiOjIwNjQwOTczODd9.NNvAY9lY_HLcVX3p2OBYVl1ZlPIobH0dpY7Zo5-oia_Tf4a9D7l5Pn0dXfD1YwYvHpJSxYDKHaYb1Rm_MPJ7d7NYbvyz3hUCWwtNb3B4R0VAEjHeUotVLRl6sQPnE0jNkiLz5M69h4nAeewI5LcYasl2V78HCNJIY3Ppf9qz7O1--dRZLTWvhaN6axD7c-O6sGIDyRwEwiEl5Y1WmlRla11DPadwi42c3D1yEqXB1GSKwpTizPMAsUi1MgnKDZi-51wD2ZxsAcQ77ZnPQtJJMYQ7JtdfafiuwTu9nlTfVxVINrgOPoHWUloO8xCksyy_F0oRJEJfmnp_gCw3qGAzvQ'
 }
 
-def test_root_endpoint():
-    """Test the root endpoint to check if API is running"""
+def test_root_endpoint() -> bool:
+    """
+    Test the root endpoint of the API to verify if it's running.
+    
+    Makes a GET request to the root endpoint and verifies the response
+    contains the expected message.
+    
+    Returns:
+        bool: True if test passes, False if test fails
+    """
     print("\nTesting root endpoint...")
     try:
         response = requests.get(f"{BASE_URL}/", headers=HEADERS)
@@ -28,8 +37,16 @@ def test_root_endpoint():
         print(f"❌ Root endpoint test failed: {str(e)}")
         return False
 
-def test_predict_endpoint():
-    """Test the predict endpoint with an image"""
+def test_predict_endpoint() -> bool:
+    """
+    Test the predict endpoint with a sample image.
+    
+    Sends a POST request with a test image file to the predict endpoint
+    and verifies the response contains valid prediction data.
+    
+    Returns:
+        bool: True if test passes, False if test fails
+    """
     print("\nTesting predict endpoint...")
     
 
@@ -65,16 +82,24 @@ def test_predict_endpoint():
         print(f"❌ Predict endpoint test failed: {str(e)}")
         return False
 
-def run_all_tests():
-    """Run all endpoint tests and report results"""
+def run_all_tests() -> int:
+    """
+    Run all available API endpoint tests and generate a summary report.
+    
+    Executes each test function and collects their results.
+    Prints a summary of test results at the end.
+    
+    Returns:
+        int: Exit code (0 for all tests passed, 1 for any test failed)
+    """
     print("Starting E2E API tests...")
     
-    tests = [
+    tests: List[Tuple[str, callable]] = [
         ("Root Endpoint", test_root_endpoint),
         ("Predict Endpoint", test_predict_endpoint)
     ]
     
-    results = []
+    results: List[Tuple[str, bool]] = []
     for name, test_func in tests:
         results.append((name, test_func()))
     

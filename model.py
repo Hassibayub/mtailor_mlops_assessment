@@ -5,20 +5,35 @@ from typing import Tuple
 
 
 class ImagePreprocessor:
-    def __init__(self):
-        self.input_size = (224, 224)
-        self.mean = np.array([0.485, 0.456, 0.406]).reshape(1, 1, 3)
-        self.std = np.array([0.229, 0.224, 0.225]).reshape(1, 1, 3)
+    """
+    Handles image preprocessing for ONNX model inference.
+    
+    Attributes:
+        input_size (Tuple[int, int]): Target size for image resizing (height, width)
+        mean (np.ndarray): Mean values for ImageNet normalization
+        std (np.ndarray): Standard deviation values for ImageNet normalization
+    """
+    
+    def __init__(self) -> None:
+        """Initialize the image preprocessor with ImageNet normalization parameters."""
+        self.input_size: Tuple[int, int] = (224, 224)
+        self.mean: np.ndarray = np.array([0.485, 0.456, 0.406]).reshape(1, 1, 3)
+        self.std: np.ndarray = np.array([0.229, 0.224, 0.225]).reshape(1, 1, 3)
 
     def preprocess(self, image_path: str) -> np.ndarray:
         """
         Preprocess image for model inference.
         
         Args:
-            image_path: Path to input image
+            image_path (str): Path to input image file
             
         Returns:
-            Preprocessed image as numpy array in NCHW format
+            np.ndarray: Preprocessed image as numpy array in NCHW format
+                       Shape: (1, 3, height, width)
+                       
+        Raises:
+            FileNotFoundError: If image file doesn't exist
+            PIL.UnidentifiedImageError: If image format is not supported
         """
         # Load and convert to RGB
         image = Image.open(image_path).convert('RGB')
@@ -39,27 +54,37 @@ class ImagePreprocessor:
 
 
 class ONNXModel:
-    """Handles ONNX model loading and inference."""
+    """
+    Handles ONNX model loading and inference.
     
-    def __init__(self, model_path: str):
+    Attributes:
+        session (onnxruntime.InferenceSession): ONNX runtime inference session
+        preprocessor (ImagePreprocessor): Instance of image preprocessor
+    """
+    
+    def __init__(self, model_path: str) -> None:
         """
         Initialize ONNX model.
         
         Args:
-            model_path: Path to ONNX model file
+            model_path (str): Path to ONNX model file
+            
+        Raises:
+            FileNotFoundError: If model file doesn't exist
+            onnxruntime.RuntimeException: If model loading fails
         """
-        self.session = onnxruntime.InferenceSession(model_path)
-        self.preprocessor = ImagePreprocessor()
+        self.session: onnxruntime.InferenceSession = onnxruntime.InferenceSession(model_path)
+        self.preprocessor: ImagePreprocessor = ImagePreprocessor()
 
     def predict(self, image_path: str) -> Tuple[int, float]:
         """
         Run inference on input image.
         
         Args:
-            image_path: Path to input image
+            image_path (str): Path to input image
             
         Returns:
-            Tuple of (predicted_class_id, confidence_score)
+            Tuple[int, float]: Tuple of (predicted_class_id, confidence_score)
         """
         # Preprocess image
         input_tensor = self.preprocessor.preprocess(image_path)

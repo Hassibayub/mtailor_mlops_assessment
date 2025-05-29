@@ -1,9 +1,10 @@
+from typing import Tuple
+
 import numpy as np
 import onnxruntime
 import torch
 import torch.onnx
 from PIL import Image
-from typing import Dict, Tuple, Optional
 
 from pytorch_model import BasicBlock, Classifier
 

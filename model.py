@@ -1,19 +1,20 @@
-import onnxruntime
-import numpy as np
-from PIL import Image
 from typing import Tuple
+
+import numpy as np
+import onnxruntime
+from PIL import Image
 
 
 class ImagePreprocessor:
     """
     Handles image preprocessing for ONNX model inference.
-    
+
     Attributes:
         input_size (Tuple[int, int]): Target size for image resizing (height, width)
         mean (np.ndarray): Mean values for ImageNet normalization
         std (np.ndarray): Standard deviation values for ImageNet normalization
     """
-    
+
     def __init__(self) -> None:
         """Initialize the image preprocessor with ImageNet normalization parameters."""
         self.input_size: Tuple[int, int] = (224, 224)
@@ -23,32 +24,32 @@ class ImagePreprocessor:
     def preprocess(self, image_path: str) -> np.ndarray:
         """
         Preprocess image for model inference.
-        
+
         Args:
             image_path (str): Path to input image file
-            
+
         Returns:
             np.ndarray: Preprocessed image as numpy array in NCHW format
                        Shape: (1, 3, height, width)
-                       
+
         Raises:
             FileNotFoundError: If image file doesn't exist
             PIL.UnidentifiedImageError: If image format is not supported
         """
         # Load and convert to RGB
-        image = Image.open(image_path).convert('RGB')
-        
+        image = Image.open(image_path).convert("RGB")
+
         # Resize using bilinear interpolation
         image = image.resize(self.input_size, Image.BILINEAR)
-        
+
         # Convert to numpy and normalize (float32)
         image_array = np.array(image, dtype=np.float32) / 255.0
-        
+
         # Apply ImageNet normalization (float32)
         mean = self.mean.astype(np.float32)
         std = self.std.astype(np.float32)
         normalized = (image_array - mean) / std
-        
+
         # Add batch dimension and transpose to NCHW format
         return np.expand_dims(normalized.transpose(2, 0, 1), 0).astype(np.float32)
 
@@ -56,19 +57,19 @@ class ImagePreprocessor:
 class ONNXModel:
     """
     Handles ONNX model loading and inference.
-    
+
     Attributes:
         session (onnxruntime.InferenceSession): ONNX runtime inference session
         preprocessor (ImagePreprocessor): Instance of image preprocessor
     """
-    
+
     def __init__(self, model_path: str) -> None:
         """
         Initialize ONNX model.
-        
+
         Args:
             model_path (str): Path to ONNX model file
-            
+
         Raises:
             FileNotFoundError: If model file doesn't exist
             onnxruntime.RuntimeException: If model loading fails
@@ -79,25 +80,25 @@ class ONNXModel:
     def predict(self, image_path: str) -> Tuple[int, float]:
         """
         Run inference on input image.
-        
+
         Args:
             image_path (str): Path to input image
-            
+
         Returns:
             Tuple[int, float]: Tuple of (predicted_class_id, confidence_score)
         """
         # Preprocess image
         input_tensor = self.preprocessor.preprocess(image_path)
-        
+
         # Get input name from model
         input_name = self.session.get_inputs()[0].name
-        
+
         # Run inference
         outputs = self.session.run(None, {input_name: input_tensor})
-        
+
         # Get predicted class and confidence
         probabilities = outputs[0][0]
         predicted_class = int(np.argmax(probabilities))
         confidence = float(probabilities[predicted_class])
-        
+
         return predicted_class, confidence
